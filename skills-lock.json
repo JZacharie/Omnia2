@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "wearos-specialist": {
+      "source": "gitdolucas/wearos-specialist",
+      "sourceType": "github",
+      "computedHash": "033fad34fb32d43ad29efc258995dff9f7cdb69606ab5f9016a29bf95ed6999a"
+    }
+  }
+}

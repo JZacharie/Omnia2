@@ -29,10 +29,9 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    // kotlinOptions est obsolète, la configuration se fait maintenant via tasks.withType
     buildFeatures {
         compose = true
     }
@@ -40,6 +39,9 @@ android {
         resources {
             excludes += "/META-INF/INDEX.LIST"
             excludes += "META-INF/io.netty.versions.properties"
+        }
+        jniLibs {
+            doNotStrip.add("**/libandroidx.graphics.path.so")
         }
     }
 }
@@ -81,6 +83,6 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
