@@ -25,8 +25,9 @@ class S3Manager(context: Context) {
     
     private val s3Client: AmazonS3Client by lazy {
         disableSSLCertificateChecking()
-        AmazonS3Client(credentials, ClientConfiguration()).apply {
-            setRegion(Region.getRegion(Regions.fromName(S3Config.REGION)))
+        // Utilisation du constructeur non-déprécié avec la région
+        val region = Region.getRegion(Regions.fromName(S3Config.REGION))
+        AmazonS3Client(credentials, region, ClientConfiguration()).apply {
             setEndpoint(S3Config.ENDPOINT)
             setS3ClientOptions(S3ClientOptions.builder().setPathStyleAccess(true).build())
         }

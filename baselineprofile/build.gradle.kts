@@ -28,13 +28,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    // kotlinOptions est obsolète, la configuration se fait maintenant via tasks.withType
 }
 
 dependencies {
-    implementation(libs.androidx.baselineprofile)
     implementation(libs.androidx.benchmark.macro.junit4)
-    implementation(libs.ui.test.junit4)
+    implementation(libs.androidx.test.ext.junit)
+    implementation(libs.androidx.test.uiautomator)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
 }
