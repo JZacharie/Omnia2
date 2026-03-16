@@ -129,43 +129,65 @@ fun WearApp() {
     }
 
     val refreshLocalFiles = {
-        localFiles = context.filesDir.listFiles()?.filter { it.name.endsWith(".mp4") }?.sortedByDescending { it.lastModified() } ?: emptyList()
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val files = context.filesDir.listFiles()?.filter { it.name.endsWith(".mp4") }?.sortedByDescending { it.lastModified() } ?: emptyList()
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                localFiles = files
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
-        Log.d("Omnia2", "UI Loaded, initializing managers...")
+        Log.d("Omnia2", "UI Loaded, initializing critical managers...")
         refreshLocalFiles()
         
-        scope.launch {
+        // On n'initialise MQTT que si nécessaire ou de manière asynchrone légère
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                s3Manager = S3Manager(context)
-                mqttManager = MqttManager()
-                mqttManager?.connect()
-                mqttManager?.messages?.collect { msg ->
-                    mqttMessages = (listOf(msg) + mqttMessages).take(20)
+                if (mqttManager == null) {
+                    val manager = MqttManager()
+                    manager.connect()
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        mqttManager = manager
+                    }
+                    manager.messages.collect { msg ->
+                        withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            mqttMessages = (listOf(msg) + mqttMessages).take(20)
+                        }
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("Omnia2", "Manager init failed", e)
+                Log.e("Omnia2", "MQTT init failed", e)
             }
         }
     }
 
-    // Correction du chronomètre : incrémentation automatique
-    LaunchedEffect(isRecording, isPaused) {
-        if (isRecording && !isPaused) {
-            while (true) {
-                delay(1000L)
-                recordingTime++
-            }
-        }
-    }
-
+    // Lazy initialization de S3Manager lors de la navigation
     LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage == 1) {
-            try {
-                s3Files = s3Manager?.listFiles()?.filter { it.key.endsWith(".mp4") } ?: emptyList()
-            } catch (e: Exception) {}
-        } else if (pagerState.currentPage == 2) {
+        if (pagerState.currentPage == 1 || pagerState.currentPage == 2) {
+            if (s3Manager == null) {
+                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    val manager = S3Manager(context)
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        s3Manager = manager
+                    }
+                    if (pagerState.currentPage == 1) {
+                        val files = manager.listFiles().filter { it.key.endsWith(".mp4") }
+                        withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            s3Files = files
+                        }
+                    }
+                }
+            } else if (pagerState.currentPage == 1) {
+                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    val files = s3Manager?.listFiles()?.filter { it.key.endsWith(".mp4") } ?: emptyList()
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        s3Files = files
+                    }
+                }
+            }
+        }
+        if (pagerState.currentPage == 2) {
             refreshLocalFiles()
         }
     }

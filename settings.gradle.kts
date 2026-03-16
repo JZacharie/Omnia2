@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Omnia2"
 include(":app")
+include(":baselineprofile")
  
