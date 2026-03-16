@@ -37,6 +37,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import org.json.JSONObject
 import java.io.File
 import java.util.Locale
@@ -160,6 +165,22 @@ fun WearApp() {
                 }
             } catch (e: Exception) {
                 Log.e("Omnia2", "MQTT init failed", e)
+            }
+        }
+    }
+
+    LaunchedEffect(isRecording, isPaused) {
+        if (isRecording && !isPaused) {
+            while (true) {
+                delay(1000L)
+                recordingTime++
+                
+                // Mettre à jour l'amplitude moyenne si possible
+                recorderState.value?.let {
+                    try {
+                        amplitude = it.maxAmplitude.toFloat()
+                    } catch (e: Exception) {}
+                }
             }
         }
     }
@@ -315,15 +336,18 @@ fun RecordScreen(
         Row {
             if (!isRecording) {
                 Button(onClick = onStartRecording) { 
-                    Text("REC") 
+                    Icon(imageVector = Icons.Default.Mic, contentDescription = "Record")
                 }
             } else {
                 Button(onClick = onTogglePause) { 
-                    Text(if (isPaused) "RES" else "PAU")
+                    Icon(
+                        imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, 
+                        contentDescription = if (isPaused) "Resume" else "Pause"
+                    )
                 }
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Button(onClick = onStopRecording, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)) { 
-                    Text("STOP")
+                    Icon(imageVector = Icons.Default.Stop, contentDescription = "Stop")
                 }
             }
         }

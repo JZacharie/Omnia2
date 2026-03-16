@@ -76,6 +76,7 @@ dependencies {
     
     baselineProfile(project(":baselineprofile"))
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.compose.material.icons.extended)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

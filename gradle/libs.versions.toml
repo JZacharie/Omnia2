@@ -57,6 +57,7 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version = "2.3.0" }
 ui-test-manifest-debug = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeUiTooling" }
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
